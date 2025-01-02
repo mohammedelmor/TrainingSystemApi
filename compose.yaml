@@ -1,9 +1,52 @@
 services:
-  postgres:
+  api_db:
     image: 'postgres:latest'
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_DB=training'
+      - 'POSTGRES_PASSWORD=admin'
+      - 'POSTGRES_USER=admin'
     ports:
-      - '5432'
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ 'CMD', 'pg_isready', '-U', 'admin' ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  auth_server_db:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=keycloak'
+      - 'POSTGRES_PASSWORD=admin'
+      - 'POSTGRES_USER=admin'
+    ports:
+      - '5433:5432'
+    volumes:
+      - auth_server_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ 'CMD', 'pg_isready', '-U', 'admin' ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  keycloak:
+    image: 'quay.io/keycloak/keycloak:25.0'
+    environment:
+      - 'KEYCLOAK_ADMIN=admin'
+      - 'KEYCLOAK_ADMIN_PASSWORD=admin'
+      - 'KC_DB=postgres'
+      - 'KC_DB_URL=jdbc:postgresql://auth_server_db:5432/keycloak'
+      - 'KC_DB_USERNAME=admin'
+      - 'KC_DB_PASSWORD=admin'
+      - 'KC_HOSTNAME=localhost'
+      - 'KC_HEALTH_ENABLED=true'
+      - 'KC_METRICS_ENABLED=true'
+    command:
+      - start-dev
+    ports:
+      - '8080:8080'
+    depends_on:
+      - auth_server_db
+volumes:
+  postgres_data:
+  auth_server_data:
