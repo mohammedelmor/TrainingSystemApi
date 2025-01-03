@@ -1,0 +1,38 @@
+server:
+  port: 9090
+spring:
+  application:
+    name: TrainingSystemApi
+  datasource:
+    url: jdbc:postgresql://localhost:5432/training
+    username: admin
+    password: admin
+    name: training
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/Training
+          jwk-set-uri: http://localhost:8080/realms/Training/protocol/openid-connect/certs
+keycloak:
+  host: http://localhost:8080
+  realm: Training
+  username: ${KC_USERNAME}
+  password: ${KC_PASSWORD}
+  clientId: ${KC_CLIENT_ID}
+  clientSecret: ${KC_CLIENT_SECRET}
+  datasource:
+    url: jdbc:postgresql://localhost:5433/keycloak
+    username: admin
+    password: admin
+    name: keycloak
+
+springdoc:
+  port
+  swagger-ui:
+    path: /swagger-ui.html
